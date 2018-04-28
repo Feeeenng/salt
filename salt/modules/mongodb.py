@@ -592,3 +592,27 @@ def remove(collection, query=None, user=None, password=None,
     except pymongo.errors.PyMongoError as err:
         log.error("Removing objects failed with error: %s", _get_error_message(err))
         return _get_error_message(err)
+
+def server_status(user=None, password=None, host=None, port=None, database='admin', authdb=None):
+    '''
+	Get MongoDB instance Server Status
+
+	CLI Example:
+
+	.. code-block:: bash
+
+		salt '*' mongodb.server_status <user> <password> <host> <port> <database>
+	'''
+    conn = _connect(user, password, host, port, authdb=authdb)
+    if not conn:
+        err_msg = "Failed to connect to MongoDB database {0}:{1}".format(host, port)
+        log.error(err_msg)
+        return (False, err_msg)
+
+    mdb = pymongo.database.Database(conn, database)
+    try:
+
+        return mdb.command("serverStatus",1)
+    except pymongo.errors.PyMongoError as err:
+        log.error('Server status failed with error: %s', err)
+        return six.text_type(err)
